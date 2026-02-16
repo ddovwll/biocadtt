@@ -32,6 +32,8 @@ type tableColumn struct {
 	get    func(models.DeviceData) string
 }
 
+const filenameTimeFormat = "20060102_150405"
+
 func NewService(outputDir string) (*PdfGenerator, error) {
 	outputDir = strings.TrimSpace(outputDir)
 	if outputDir == "" {
@@ -45,7 +47,7 @@ func NewService(outputDir string) (*PdfGenerator, error) {
 	return &PdfGenerator{outputDir: outputDir}, nil
 }
 
-func (s *PdfGenerator) Generate(ctx context.Context, unitGUID string, data []models.DeviceData) error {
+func (s *PdfGenerator) GenerateReport(ctx context.Context, unitGUID string, data []models.DeviceData) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -55,7 +57,7 @@ func (s *PdfGenerator) Generate(ctx context.Context, unitGUID string, data []mod
 		return fmt.Errorf("unitGUID is empty")
 	}
 
-	filename := sanitizeFileName(unitGUID) + "_" + time.Now().UTC().Format("20060102_150405") + ".pdf"
+	filename := sanitizeFileName(unitGUID) + "_" + time.Now().UTC().Format(filenameTimeFormat) + ".pdf"
 	outPath := filepath.Join(s.outputDir, filename)
 
 	pdf := gofpdf.New("L", "mm", "A4", "")
@@ -119,6 +121,54 @@ func (s *PdfGenerator) Generate(ctx context.Context, unitGUID string, data []mod
 
 	if err := pdf.OutputFileAndClose(outPath); err != nil {
 		return fmt.Errorf("write pdf: %w", err)
+	}
+
+	return nil
+}
+
+func (s *PdfGenerator) GenerateError(ctx context.Context, file models.ProcessedFile) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	baseName := strings.TrimSpace(filepath.Base(file.FileName))
+	if baseName == "" {
+		baseName = "unknown_file"
+	}
+
+	filename := sanitizeFileName(baseName) + "_error_" + time.Now().UTC().Format(filenameTimeFormat) + ".pdf"
+	outPath := filepath.Join(s.outputDir, filename)
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(12, 12, 12)
+	pdf.SetAutoPageBreak(true, 12)
+	pdf.AddUTF8FontFromBytes("DejaVuSans", "", dejavuSans)
+	pdf.AddUTF8FontFromBytes("DejaVuSans", "B", dejavuSansBold)
+
+	pdf.AddPage()
+	pdf.SetFont("DejaVuSans", "B", 16)
+	pdf.CellFormat(0, 8, "File Processing Error", "", 1, "L", false, 0, "")
+	pdf.Ln(2)
+
+	pdf.SetFont("DejaVuSans", "B", 11)
+	pdf.CellFormat(0, 7, "File", "", 1, "L", false, 0, "")
+	pdf.SetFont("DejaVuSans", "", 10)
+	pdf.MultiCell(0, 6, file.FileName, "", "L", false)
+
+	pdf.Ln(1)
+	pdf.SetFont("DejaVuSans", "B", 11)
+	pdf.CellFormat(0, 7, "ProcessedAt (UTC)", "", 1, "L", false, 0, "")
+	pdf.SetFont("DejaVuSans", "", 10)
+	pdf.MultiCell(0, 6, file.ProcessedAt.UTC().Format(time.RFC3339), "", "L", false)
+
+	pdf.Ln(1)
+	pdf.SetFont("DejaVuSans", "B", 11)
+	pdf.CellFormat(0, 7, "Error", "", 1, "L", false, 0, "")
+	pdf.SetFont("DejaVuSans", "", 10)
+	pdf.MultiCell(0, 6, file.ErrorMessage, "", "L", false)
+
+	if err := pdf.OutputFileAndClose(outPath); err != nil {
+		return fmt.Errorf("write error pdf: %w", err)
 	}
 
 	return nil

@@ -41,16 +41,30 @@ func (m *MockReportGenerator) EXPECT() *MockReportGeneratorMockRecorder {
 	return m.recorder
 }
 
-// Generate mocks base method.
-func (m *MockReportGenerator) Generate(ctx context.Context, unitGUID string, data []models.DeviceData) error {
+// GenerateError mocks base method.
+func (m *MockReportGenerator) GenerateError(ctx context.Context, file models.ProcessedFile) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Generate", ctx, unitGUID, data)
+	ret := m.ctrl.Call(m, "GenerateError", ctx, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Generate indicates an expected call of Generate.
-func (mr *MockReportGeneratorMockRecorder) Generate(ctx, unitGUID, data any) *gomock.Call {
+// GenerateError indicates an expected call of GenerateError.
+func (mr *MockReportGeneratorMockRecorder) GenerateError(ctx, file any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockReportGenerator)(nil).Generate), ctx, unitGUID, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateError", reflect.TypeOf((*MockReportGenerator)(nil).GenerateError), ctx, file)
+}
+
+// GenerateReport mocks base method.
+func (m *MockReportGenerator) GenerateReport(ctx context.Context, unitGUID string, data []models.DeviceData) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateReport", ctx, unitGUID, data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GenerateReport indicates an expected call of GenerateReport.
+func (mr *MockReportGeneratorMockRecorder) GenerateReport(ctx, unitGUID, data any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateReport", reflect.TypeOf((*MockReportGenerator)(nil).GenerateReport), ctx, unitGUID, data)
 }

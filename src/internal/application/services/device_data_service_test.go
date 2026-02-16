@@ -59,7 +59,7 @@ func TestDeviceDataService_ProcessFile_Success(t *testing.T) {
 	calls := map[string]int{}
 	mu := &sync.Mutex{}
 	reportGen.EXPECT().
-		Generate(gomock.Any(), gomock.Any(), gomock.Any()).
+		GenerateReport(gomock.Any(), gomock.Any(), gomock.Any()).
 		DoAndReturn(func(_ context.Context, guid string, rows []models.DeviceData) error {
 			mu.Lock()
 			defer mu.Unlock()
@@ -146,6 +146,9 @@ func TestDeviceDataService_ProcessFile_ReadErrorWritesFailureRecord(t *testing.T
 			}
 			return nil
 		})
+	reportGen.EXPECT().
+		GenerateError(ctx, gomock.AssignableToTypeOf(models.ProcessedFile{})).
+		Return(nil)
 
 	err := svc.ProcessFile(ctx, filename)
 	if !errors.Is(err, readErr) {

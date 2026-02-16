@@ -98,6 +98,11 @@ func (s *DeviceDataService) ProcessFile(ctx context.Context, filename string) er
 			return errors.Join(processErr, saveErr)
 		}
 
+		reportErr := s.reportGenerator.GenerateError(ctx, processedFile)
+		if reportErr != nil {
+			return errors.Join(processErr, reportErr)
+		}
+
 		return processErr
 	}
 
@@ -118,7 +123,7 @@ func (s *DeviceDataService) generateReports(ctx context.Context, data []models.D
 	eg, egCtx := errgroup.WithContext(ctx)
 	for GUID, unit := range units {
 		eg.Go(func() error {
-			return s.reportGenerator.Generate(egCtx, GUID, unit)
+			return s.reportGenerator.GenerateReport(egCtx, GUID, unit)
 		})
 	}
 

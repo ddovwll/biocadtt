@@ -7,5 +7,6 @@ import (
 )
 
 type ReportGenerator interface {
-	Generate(ctx context.Context, unitGUID string, data []models.DeviceData) error
+	GenerateReport(ctx context.Context, unitGUID string, data []models.DeviceData) error
+	GenerateError(ctx context.Context, file models.ProcessedFile) error
 }

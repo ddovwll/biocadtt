@@ -3,6 +3,7 @@ package tsv
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -69,6 +70,10 @@ func (r *TsvReader) ReadDeviceData(ctx context.Context, filename string) ([]mode
 		}
 
 		data = append(data, parsed)
+	}
+
+	if len(data) == 0 {
+		return nil, errors.New("no data")
 	}
 
 	return data, nil

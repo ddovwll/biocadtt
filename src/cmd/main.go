@@ -31,6 +31,7 @@ func main() {
 	pool, err := initDB(cfg.PostgresConfig())
 	if err != nil {
 		logger.Error("failed to initialize postgres pool", "error", err)
+		os.Exit(1)
 	}
 
 	deviceDataRepository, processedFileRepository := initRepositories(pool)
@@ -39,6 +40,7 @@ func main() {
 	pdfGenerator, err := initPdfGenerator(cfg.ReportsDir)
 	if err != nil {
 		logger.Error("failed to initialize pdf generator", "error", err)
+		os.Exit(1)
 	}
 
 	deviceDataService := initServices(
@@ -81,6 +83,7 @@ func main() {
 		)
 	}
 	logger.Info("server shut down")
+	pool.Close()
 }
 
 func initLogger(env string) *slog.Logger {
