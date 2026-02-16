@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: biocadtt-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: biocadtt
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d biocadtt"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    image: migrate/migrate:4
+    container_name: biocadtt-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations:ro
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:postgres@db:5432/biocadtt?sslmode=disable",
+        "up"
+      ]
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: biocadtt-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_DSN: postgres://postgres:postgres@db:5432/biocadtt?sslmode=disable
+      HTTP_ADDR: :8080
+      WATCHER_DIR: /app/watch
+      REPORTS_DIR: /app/reports
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./reports:/app/reports
+      - ./watch:/app/watch
+
+volumes:
+  pgdata:
