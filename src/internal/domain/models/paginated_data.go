@@ -1,10 +1,10 @@
 package models
 
 type PaginatedData[T any] struct {
-	Data   []T
-	Take   int
-	Offset int
-	Total  int
+	Data  []T
+	Page  int
+	Limit int
+	Total int
 }
 
-const MaxTake = 1000
+const MaxLimit = 1000

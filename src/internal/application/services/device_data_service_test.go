@@ -153,7 +153,7 @@ func TestDeviceDataService_ProcessFile_ReadErrorWritesFailureRecord(t *testing.T
 	}
 }
 
-func TestDeviceDataService_GetUnitData_MaxTakeExceeded(t *testing.T) {
+func TestDeviceDataService_GetUnitData_MaxLimitExceeded(t *testing.T) {
 	t.Parallel()
 
 	ctrl := gomock.NewController(t)
@@ -167,9 +167,9 @@ func TestDeviceDataService_GetUnitData_MaxTakeExceeded(t *testing.T) {
 
 	svc := NewDeviceDataService(deviceRepo, processedRepo, tsvReader, txManager, reportGen)
 
-	_, err := svc.GetUnitData(context.Background(), "u-1", models.MaxTake+1, 0)
-	if !errors.Is(err, domain.ErrMaxTakeExceeded) {
-		t.Fatalf("expected ErrMaxTakeExceeded, got %v", err)
+	_, err := svc.GetUnitData(context.Background(), "u-1", 1, models.MaxLimit+1)
+	if !errors.Is(err, domain.ErrMaxLimitExceeded) {
+		t.Fatalf("expected ErrMaxLimitExceeded, got %v", err)
 	}
 }
 
@@ -189,24 +189,24 @@ func TestDeviceDataService_GetUnitData_Success(t *testing.T) {
 
 	ctx := context.Background()
 	unitGUID := "u-1"
-	take := 10
-	offset := 0
+	page := 1
+	limit := 10
 	expected := models.PaginatedData[models.DeviceData]{
-		Data:   []models.DeviceData{{N: 1, UnitGuid: unitGUID}},
-		Take:   take,
-		Offset: offset,
-		Total:  1,
+		Data:  []models.DeviceData{{N: 1, UnitGuid: unitGUID}},
+		Page:  page,
+		Limit: limit,
+		Total: 1,
 	}
 
 	deviceRepo.EXPECT().
-		GetByUnitUUIDPaginated(ctx, unitGUID, take, offset).
+		GetByUnitUUIDPaginated(ctx, unitGUID, page, limit).
 		Return(expected, nil)
 
-	got, err := svc.GetUnitData(ctx, unitGUID, take, offset)
+	got, err := svc.GetUnitData(ctx, unitGUID, page, limit)
 	if err != nil {
 		t.Fatalf("GetUnitData() error = %v", err)
 	}
-	if got.Total != expected.Total || got.Take != expected.Take || got.Offset != expected.Offset {
+	if got.Total != expected.Total || got.Page != expected.Page || got.Limit != expected.Limit {
 		t.Fatalf("unexpected pagination: %+v", got)
 	}
 	if len(got.Data) != 1 || got.Data[0].UnitGuid != unitGUID {

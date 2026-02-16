@@ -128,10 +128,10 @@ func (s *DeviceDataService) generateReports(ctx context.Context, data []models.D
 func (s *DeviceDataService) GetUnitData(
 	ctx context.Context,
 	unitGUID string,
-	take, offset int,
+	page, limit int,
 ) (models.PaginatedData[models.DeviceData], error) {
-	if take > models.MaxTake {
-		return models.PaginatedData[models.DeviceData]{}, domain.ErrMaxTakeExceeded
+	if limit > models.MaxLimit {
+		return models.PaginatedData[models.DeviceData]{}, domain.ErrMaxLimitExceeded
 	}
-	return s.deviceDataRepo.GetByUnitUUIDPaginated(ctx, unitGUID, take, offset)
+	return s.deviceDataRepo.GetByUnitUUIDPaginated(ctx, unitGUID, page, limit)
 }

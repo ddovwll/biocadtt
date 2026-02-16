@@ -83,9 +83,10 @@ func (r *DeviceDataRepo) CreateBatch(ctx context.Context, deviceData []models.De
 func (r *DeviceDataRepo) GetByUnitUUIDPaginated(
 	ctx context.Context,
 	unitGuid string,
-	take, offset int,
+	page, limit int,
 ) (models.PaginatedData[models.DeviceData], error) {
 	q := data.QuerierFromContext(ctx, r.pool)
+	offset := (page - 1) * limit
 
 	var total int
 	if err := q.QueryRow(
@@ -120,13 +121,13 @@ ORDER BY unit_guid
 LIMIT $2 OFFSET $3;
 `
 
-	rows, err := r.pool.Query(ctx, query, unitGuid, take, offset)
+	rows, err := r.pool.Query(ctx, query, unitGuid, limit, offset)
 	if err != nil {
 		return models.PaginatedData[models.DeviceData]{}, fmt.Errorf("select file_data page: %w", err)
 	}
 	defer rows.Close()
 
-	items := make([]models.DeviceData, 0, take)
+	items := make([]models.DeviceData, 0, limit)
 	for rows.Next() {
 		var d models.DeviceData
 		if err := rows.Scan(
@@ -156,9 +157,9 @@ LIMIT $2 OFFSET $3;
 	}
 
 	return models.PaginatedData[models.DeviceData]{
-		Data:   items,
-		Take:   take,
-		Offset: offset,
-		Total:  total,
+		Data:  items,
+		Page:  page,
+		Limit: limit,
+		Total: total,
 	}, nil
 }

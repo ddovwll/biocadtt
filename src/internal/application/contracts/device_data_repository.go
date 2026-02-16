@@ -11,6 +11,6 @@ type DeviceDataRepository interface {
 	GetByUnitUUIDPaginated(
 		ctx context.Context,
 		uuid string,
-		take, offset int,
+		page, limit int,
 	) (models.PaginatedData[models.DeviceData], error)
 }

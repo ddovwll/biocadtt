@@ -8,6 +8,6 @@ import (
 )
 
 var (
-	ErrFileProcessed   = errors.New("file processed already")
-	ErrMaxTakeExceeded = fmt.Errorf("max take exceeded, max take is %d", models.MaxTake)
+	ErrFileProcessed    = errors.New("file processed already")
+	ErrMaxLimitExceeded = fmt.Errorf("max limit exceeded, max limit is %d", models.MaxLimit)
 )

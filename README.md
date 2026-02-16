@@ -89,7 +89,7 @@ docker compose up --build
 ### 3. Получить данные через API
 
 ```bash
-curl "http://localhost:8080/device-data/<unit_guid>?take=100&offset=0"
+curl "http://localhost:8080/device-data/<unit_guid>?page=1&limit=100"
 ```
 
 Пример ответа:
@@ -115,8 +115,8 @@ curl "http://localhost:8080/device-data/<unit_guid>?take=100&offset=0"
       "invert_bit": "..."
     }
   ],
-  "take": 100,
-  "offset": 0,
+  "page": 1,
+  "limit": 100,
   "total": 1
 }
 ```

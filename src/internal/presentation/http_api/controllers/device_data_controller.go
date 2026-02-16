@@ -29,24 +29,24 @@ func (c *DeviceDataController) UseController(mux *http.ServeMux) {
 }
 
 func (c *DeviceDataController) GetDeviceData(w http.ResponseWriter, r *http.Request) {
-	take := r.URL.Query().Get("take")
-	offset := r.URL.Query().Get("offset")
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
 	unitGUID := r.PathValue("unit_guid")
 
-	takeInt, err := strconv.Atoi(take)
-	if err != nil || takeInt < 0 {
-		takeInt = 100
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		pageInt = 1
 	}
 
-	offsetInt, err := strconv.Atoi(offset)
-	if err != nil || offsetInt < 0 {
-		offsetInt = 0
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil || limitInt < 1 {
+		limitInt = 100
 	}
 
-	data, err := c.deviceDataService.GetUnitData(r.Context(), unitGUID, takeInt, offsetInt)
+	data, err := c.deviceDataService.GetUnitData(r.Context(), unitGUID, pageInt, limitInt)
 	if err != nil {
-		if errors.Is(err, domain.ErrMaxTakeExceeded) {
-			c.writeErrorResponse(w, http.StatusBadRequest, "max take exceeded")
+		if errors.Is(err, domain.ErrMaxLimitExceeded) {
+			c.writeErrorResponse(w, http.StatusBadRequest, "max limit exceeded")
 			return
 		}
 
@@ -59,10 +59,10 @@ func (c *DeviceDataController) GetDeviceData(w http.ResponseWriter, r *http.Requ
 	}
 
 	resp := models.PaginatedResponse[models.DeviceDataResponse]{
-		Data:   models.MapDeviceDataToResponse(data.Data),
-		Take:   data.Take,
-		Offset: data.Offset,
-		Total:  data.Total,
+		Data:  models.MapDeviceDataToResponse(data.Data),
+		Page:  data.Page,
+		Limit: data.Limit,
+		Total: data.Total,
 	}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		c.logger.Error("failed to encode response",

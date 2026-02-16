@@ -56,16 +56,16 @@ func (mr *MockDeviceDataRepositoryMockRecorder) CreateBatch(ctx, data any) *gomo
 }
 
 // GetByUnitUUIDPaginated mocks base method.
-func (m *MockDeviceDataRepository) GetByUnitUUIDPaginated(ctx context.Context, uuid string, take, offset int) (models.PaginatedData[models.DeviceData], error) {
+func (m *MockDeviceDataRepository) GetByUnitUUIDPaginated(ctx context.Context, uuid string, page, limit int) (models.PaginatedData[models.DeviceData], error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUnitUUIDPaginated", ctx, uuid, take, offset)
+	ret := m.ctrl.Call(m, "GetByUnitUUIDPaginated", ctx, uuid, page, limit)
 	ret0, _ := ret[0].(models.PaginatedData[models.DeviceData])
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUnitUUIDPaginated indicates an expected call of GetByUnitUUIDPaginated.
-func (mr *MockDeviceDataRepositoryMockRecorder) GetByUnitUUIDPaginated(ctx, uuid, take, offset any) *gomock.Call {
+func (mr *MockDeviceDataRepositoryMockRecorder) GetByUnitUUIDPaginated(ctx, uuid, page, limit any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUnitUUIDPaginated", reflect.TypeOf((*MockDeviceDataRepository)(nil).GetByUnitUUIDPaginated), ctx, uuid, take, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUnitUUIDPaginated", reflect.TypeOf((*MockDeviceDataRepository)(nil).GetByUnitUUIDPaginated), ctx, uuid, page, limit)
 }
